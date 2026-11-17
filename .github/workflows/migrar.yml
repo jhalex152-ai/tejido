@@ -1,8 +1,8 @@
 name: Migrar base de datos
+# Manual a propósito: las migraciones 0001-0005 ya se aplicaron al proyecto de Supabase.
+# Úsalo solo para migraciones nuevas (requiere los secretos SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD y SUPABASE_PROJECT_REF).
 on:
-  push:
-    branches: [main]
-    paths: ['supabase/migrations/**']
+  workflow_dispatch:
 jobs:
   db-push:
     runs-on: ubuntu-latest

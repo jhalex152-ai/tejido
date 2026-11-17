@@ -8,7 +8,7 @@ DATA="${PGDATA_TEST:-/tmp/tejido-pgtest}"; PORT="${PGPORT_TEST:-54329}"
 as_pg() { if [ "$(id -u)" = 0 ]; then su postgres -s /bin/bash -c "$*"; else bash -c "$*"; fi; }
 
 rm -rf "$DATA"; mkdir -p "$DATA"; [ "$(id -u)" = 0 ] && chown postgres "$DATA"
-as_pg "$PGBIN/initdb -D $DATA -A trust >/dev/null"
+as_pg "$PGBIN/initdb -D $DATA -A trust -U postgres >/dev/null"
 as_pg "$PGBIN/pg_ctl -D $DATA -o '-p $PORT -k /tmp' -l $DATA/log -w start >/dev/null"
 trap 'as_pg "$PGBIN/pg_ctl -D $DATA -m immediate stop >/dev/null" || true' EXIT
 PSQL="psql -h /tmp -p $PORT -U postgres -v ON_ERROR_STOP=1 -q"
