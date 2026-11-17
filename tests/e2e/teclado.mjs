@@ -1,0 +1,47 @@
+// Navegación con teclado en /hitos y cursores de la marca. Solo lectura: EMAIL y PASSWORD de una cuenta existente.
+import fs from 'node:fs'
+import { abrir, BASE } from './lib.mjs'
+const OUT = process.env.OUT ?? '/tmp/e2e-shots'; fs.mkdirSync(OUT, { recursive: true })
+const browser = await abrir(); let mal = 0
+const check = (ok, msg) => { console.log(`  ${ok ? '✓' : '✗'} ${msg}`); if (!ok) mal++ }
+const ctx = await browser.newContext({ viewport: { width: 1365, height: 640 }, locale: 'es-CO', reducedMotion: 'reduce' }); const page = await ctx.newPage()
+await page.goto(BASE + '/login'); await page.fill('#pw-email', process.env.EMAIL); await page.fill('#pw-pass', process.env.PASSWORD)
+await Promise.all([page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 30000 }), page.click('button:has-text("Entrar")')])
+await page.goto(BASE + '/hitos', { waitUntil: 'networkidle' })
+const pos = () => page.evaluate(() => ({ x: document.querySelector('section[aria-label="Radar"]').parentElement.scrollLeft, y: window.scrollY, px: window.scrollX }))
+
+console.log('── Flechas del teclado ──')
+let a = await pos()
+await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); let b = await pos()
+check(b.x > a.x, `→ mueve el tablero (${a.x} → ${b.x} px)`)
+await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight'); await page.waitForTimeout(150); let c = await pos()
+check(c.x > b.x, `→ otra vez sigue avanzando (${c.x} px)`)
+await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(150); let d = await pos()
+check(d.x < c.x, `← regresa (${d.x} px)`)
+await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown'); await page.waitForTimeout(150); let e = await pos()
+check(e.y > 0, `↓ baja la página (${e.y} px)`)
+await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp'); await page.waitForTimeout(150); let f = await pos()
+check(f.y < e.y, `↑ sube la página (${f.y} px)`)
+check(f.px === 0, 'la página nunca se mueve de lado (solo el tablero)')
+
+console.log('── No interfiere con los controles ──')
+const antes = await page.locator('#f-pais').inputValue(); await page.locator('#f-pais').focus()
+const x0 = (await pos()).x; await page.keyboard.press('ArrowDown'); await page.waitForTimeout(150)
+check((await page.locator('#f-pais').inputValue()) !== antes && (await pos()).x === x0, 'con el foco en un filtro, las flechas cambian el filtro y no mueven el tablero')
+await page.locator('#f-pais').selectOption(''); await page.locator('#f-pais').evaluate((el) => el.blur())
+await page.goto(BASE + '/hitos/nuevo', { waitUntil: 'networkidle' }); await page.fill('#nombre', 'abc'); const y0 = await page.evaluate(() => window.scrollY)
+await page.keyboard.press('ArrowLeft'); await page.keyboard.press('ArrowLeft')
+check((await page.evaluate(() => window.scrollY)) === y0 && (await page.locator('#nombre').inputValue()) === 'abc', 'escribiendo en un campo, las flechas mueven el cursor del texto, no la página')
+
+console.log('── Cursores ──')
+await page.goto(BASE + '/hitos', { waitUntil: 'networkidle' })
+const cur = (sel) => page.locator(sel).first().evaluate((el) => getComputedStyle(el).cursor)
+const base = await page.evaluate(() => getComputedStyle(document.body).cursor)
+check(/^url\("data:image\/svg\+xml/.test(base), 'cursor normal personalizado (flecha naranja)')
+const enlace = await cur('a[href="/hitos/nuevo"]'); check(/^url\("data:image\/svg\+xml/.test(enlace) && enlace !== base, 'sobre botones y enlaces cambia al anillo naranja')
+const tarjeta = await cur('a[href^="/hitos/"]:not([href="/hitos/nuevo"])'); check(tarjeta === 'grab', `sobre una tarjeta arrastrable: ${tarjeta}`)
+const input = await cur('#f-pais'); check(/^url/.test(input), 'filtros con el cursor de la marca')
+const t0 = Date.now(); for (let i = 0; i < 20; i++) await page.mouse.move(300 + i * 30, 300 + (i % 5) * 20); check(Date.now() - t0 < 4000, `mover el mouse no añade carga (20 movimientos en ${Date.now() - t0} ms)`)
+await page.screenshot({ path: `${OUT}/kanban_teclado.png` })
+await ctx.close(); await browser.close()
+console.log(mal ? `\n${mal} problemas` : '\nTodo bien'); process.exit(mal ? 1 : 0)

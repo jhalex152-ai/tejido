@@ -17,6 +17,9 @@ export default async function HitosPage() {
       <p className="mb-4 max-w-3xl text-[14px] text-ink-muted">
         Cada hito pasa por 8 etapas. Arrastra una tarjeta a la siguiente columna para aprobar su compuerta: si falta algo, la app te dice qué.
       </p>
+      <p className="mb-4 hidden text-[13px] text-ink-faint md:block">
+        Con el teclado: <kbd className="rounded border border-line-strong px-1.5">←</kbd> <kbd className="rounded border border-line-strong px-1.5">→</kbd> mueven el tablero de columna en columna y <kbd className="rounded border border-line-strong px-1.5">↑</kbd> <kbd className="rounded border border-line-strong px-1.5">↓</kbd> suben y bajan la página.
+      </p>
       <Kanban hitos={hitos} etapas={cat.etapas} ejes={cat.ejes} paises={cat.paises} puedeMover={u.rol !== 'doer_eventos'} />
     </>
   )

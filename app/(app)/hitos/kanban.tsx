@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { DndContext, PointerSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { HitoCard } from '@/components/hitos/card'
 import { cn } from '@/components/ui'
@@ -7,11 +7,11 @@ import { moverEtapa } from './actions'
 import type { Eje, Etapa, Hito, Pais } from '@/lib/types'
 
 function Tarjeta({ hito, ejes, movible }: { hito: Hito; ejes: Eje[]; movible: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: hito.id, disabled: !movible })
+  const { listeners, setNodeRef, transform, isDragging } = useDraggable({ id: hito.id, disabled: !movible })
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners}
+    <div ref={setNodeRef} {...listeners}
       style={transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 50 } : undefined}
-      className={cn('touch-pan-y', isDragging && 'opacity-80 shadow-glow')}>
+      className={cn('touch-pan-y', movible && '[&_a]:cursor-grab active:[&_a]:cursor-grabbing', isDragging && 'opacity-80 shadow-glow')}>
       <HitoCard hito={hito} ejes={ejes} compacto />
     </div>
   )
@@ -39,6 +39,30 @@ export function Kanban({ hitos, etapas, ejes, paises, puedeMover }: { hitos: Hit
   const [aviso, setAviso] = useState<{ ok: boolean; texto: string; faltantes?: string[] } | null>(null)
   const [etapaMovil, setEtapaMovil] = useState(0)
   const [, start] = useTransition()
+  const tablero = useRef<HTMLDivElement>(null)
+  // Tras arrastrar, el navegador dispara un clic sobre la tarjeta: se bloquea para que no abra el detalle
+  const arrastrando = useRef(false)
+  const finArrastre = () => { setTimeout(() => { arrastrando.current = false }, 250) }
+
+  // Teclado: ← → desplazan el tablero una columna; ↑ ↓ desplazan la página. No interfiere al escribir ni en los filtros.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
+      const t = e.target as HTMLElement | null
+      if (t?.closest('input:not([type=checkbox]):not([type=radio]), select, textarea, [contenteditable=true], [role=listbox], [role=menu], dialog')) return
+      const el = tablero.current
+      const suave = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && el && el.offsetParent !== null) {
+        e.preventDefault()
+        el.scrollBy({ left: (e.key === 'ArrowRight' ? 1 : -1) * 304, behavior: suave })
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault()
+        window.scrollBy({ top: (e.key === 'ArrowDown' ? 1 : -1) * 160, behavior: suave })
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 6 } }))
 
   const filtrados = useMemo(() => hitos.filter((h) =>
@@ -51,6 +75,7 @@ export function Kanban({ hitos, etapas, ejes, paises, puedeMover }: { hitos: Hit
   }
 
   function soltar(e: DragEndEvent) {
+    finArrastre()
     if (!e.over) return
     const h = hitos.find((x) => x.id === e.active.id)
     const destino = Number(e.over.id)
@@ -67,10 +92,10 @@ export function Kanban({ hitos, etapas, ejes, paises, puedeMover }: { hitos: Hit
     <div>
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <div><label className="label" htmlFor="f-pais">País</label>
-          <select id="f-pais" className="field w-44" value={pais} onChange={(e) => setPais(e.target.value)}>
+          <select id="f-pais" className="field w-44" value={pais} onChange={(e) => { setPais(e.target.value); e.currentTarget.blur() }}>
             <option value="">Todos</option>{paises.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}</select></div>
         <div><label className="label" htmlFor="f-eje">Eje</label>
-          <select id="f-eje" className="field w-44" value={eje} onChange={(e) => setEje(e.target.value)}>
+          <select id="f-eje" className="field w-44" value={eje} onChange={(e) => { setEje(e.target.value); e.currentTarget.blur() }}>
             <option value="">Todos</option>{ejes.map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></div>
         <label className="flex min-h-[44px] items-center gap-2 text-[14px] text-ink-soft">
           <input type="checkbox" className="h-5 w-5 accent-[#FF6F20]" checked={verTodos} onChange={(e) => setVerTodos(e.target.checked)} />
@@ -86,8 +111,8 @@ export function Kanban({ hitos, etapas, ejes, paises, puedeMover }: { hitos: Hit
       )}
 
       {/* Escritorio: una columna por etapa */}
-      <DndContext sensors={sensors} onDragEnd={soltar}>
-        <div className="-mx-4 hidden gap-4 overflow-x-auto px-4 pb-4 [contain:paint] md:flex md:-mx-8 md:px-8">
+      <DndContext sensors={sensors} onDragStart={() => { arrastrando.current = true }} onDragEnd={soltar} onDragCancel={finArrastre}>
+        <div ref={tablero} onClickCapture={(e) => { if (arrastrando.current) { e.preventDefault(); e.stopPropagation() } }} className="-mx-4 hidden gap-4 overflow-x-auto px-4 pb-4 [contain:paint] md:flex md:-mx-8 md:px-8">
           {etapas.map((et) => {
             const items = filtrados.filter((h) => h.etapa_id === et.id)
             return (
