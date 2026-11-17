@@ -20,7 +20,7 @@ export async function Narrativa({ hito, u }: TabProps) {
       <section className="card">
         <div className="mb-4 flex items-center justify-between"><h2 className="text-lg">Mensaje y vocero</h2>{n?.aprobada && <span className="chip-brand">Aprobada por el Head</span>}</div>
         <fieldset disabled={!puede}>
-          <ActionForm action={(fd) => guardarNarrativa(hito.id, fd)} autosave>
+          <ActionForm action={guardarNarrativa.bind(null, hito.id)} autosave>
             <Field label="Mensaje clave" htmlFor="n-msg" hint="¿Qué contamos? Apóyate en una cifra validada."><textarea id="n-msg" name="mensaje_clave" rows={3} defaultValue={n?.mensaje_clave ?? ''} className="field" /></Field>
             <Field label="Vocero" htmlFor="n-voc">
               <select id="n-voc" name="vocero_id" defaultValue={n?.vocero_id ?? ''} className="field"><option value="">Sin vocero</option>{(voceros ?? []).map((v) => <option key={v.id} value={v.id}>{v.nombre}{v.cargo ? ` · ${v.cargo}` : ''}</option>)}</select>
@@ -38,7 +38,7 @@ export async function Narrativa({ hito, u }: TabProps) {
           {(piezas ?? []).map((p) => (
             <li key={p.id} className="rounded-field border border-line p-3">
               <fieldset disabled={!puede}>
-                <ActionForm action={(fd) => estadoPieza(hito.id, p.id, fd)} autosave delay={800}>
+                <ActionForm action={estadoPieza.bind(null, hito.id, p.id)} autosave delay={800}>
                   <p className="text-[14px] font-medium">{p.titulo} <span className="text-ink-muted">· {TIPO_PIEZA[p.tipo as keyof typeof TIPO_PIEZA]}</span></p>
                   <div className="grid grid-cols-[150px_1fr] gap-2">
                     <select name="estado" aria-label="Estado" defaultValue={p.estado} className="field"><option value="pendiente">Pendiente</option><option value="borrador">Borrador</option><option value="aprobada">Aprobada</option></select>
@@ -46,13 +46,13 @@ export async function Narrativa({ hito, u }: TabProps) {
                   </div>
                 </ActionForm>
               </fieldset>
-              {puede && <ActionButton action={() => borrarPieza(hito.id, p.id)} confirmar="¿Eliminar la pieza?" className="mt-1 text-[12px] text-ink-muted underline">Eliminar</ActionButton>}
+              {puede && <ActionButton action={borrarPieza.bind(null, hito.id, p.id)} confirmar="¿Eliminar la pieza?" className="mt-1 text-[12px] text-ink-muted underline">Eliminar</ActionButton>}
             </li>
           ))}
           {(piezas ?? []).length === 0 && <li className="text-[14px] text-ink-muted">Aún no hay piezas.</li>}
         </ul>
         {puede && (
-          <ActionForm action={(fd) => agregarPieza(hito.id, fd)} submit="Agregar pieza" outline reset className="mt-4">
+          <ActionForm action={agregarPieza.bind(null, hito.id)} submit="Agregar pieza" outline reset className="mt-4">
             <div className="grid grid-cols-[170px_1fr] gap-2">
               <select name="tipo" aria-label="Tipo" className="field">{Object.entries(TIPO_PIEZA).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
               <input name="titulo" aria-label="Título" required placeholder="Título de la pieza" className="field" />

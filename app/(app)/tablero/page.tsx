@@ -125,7 +125,7 @@ export default async function Tablero({ searchParams }: { searchParams: Promise<
         <Tile k="Amplificación ≤ 48 h" v={terminados.length ? fmtPct(en48.length / terminados.length) : '—'} nota={`meta ≥ 90% · ${en48.length}/${terminados.length} eventos terminados`} />
       </section>
 
-      <section className="mb-8 grid gap-6 xl:grid-cols-2">
+      <section className="mb-8 grid gap-6 2xl:grid-cols-2">
         <div className="card">
           <h2 className="mb-1 text-lg">Embudo por vertical</h2>
           <p className="mb-3 text-[13px] text-ink-muted">Capturados → calificados (A+B) → registros en Dropi → activos a 30 días.</p>

@@ -41,13 +41,13 @@ export async function Datos({ hito, u, cat }: TabProps) {
                 </div>
                 <p className="mt-1 text-[22px] font-bold tracking-tight text-brand-light">{c.valor != null ? new Intl.NumberFormat('es-CO').format(c.valor) : c.valor_texto} <span className="text-[14px] font-normal text-ink-muted">{c.unidad}</span></p>
                 <p className="mt-1 text-[12px] text-ink-muted">Fuente: {c.fuente} · corte {fechaCorta(c.fecha_corte)}{c.vigente_hasta && ` · vigente hasta ${fechaCorta(c.vigente_hasta)}`}</p>
-                {puede && <div className="mt-2"><ActionButton action={() => desvincularCifra(hito.id, c.id)} className="text-[12px] text-ink-muted underline">Desvincular</ActionButton></div>}
+                {puede && <div className="mt-2"><ActionButton action={desvincularCifra.bind(null, hito.id, c.id)} className="text-[12px] text-ink-muted underline">Desvincular</ActionButton></div>}
               </li>
             ))}
           </ul>
         )}
         {puede && disponibles.length > 0 && (
-          <ActionForm action={(fd) => vincularCifra(hito.id, fd)} submit="Vincular cifra" outline reset className="mt-4">
+          <ActionForm action={vincularCifra.bind(null, hito.id)} submit="Vincular cifra" outline reset className="mt-4">
             <label className="label" htmlFor="cifra-sel">Vincular una cifra de la biblioteca (de los ejes del hito)</label>
             <select id="cifra-sel" name="cifra_id" className="field" defaultValue="">
               <option value="" disabled>Elige una cifra</option>

@@ -34,7 +34,7 @@ export async function Evaluacion({ hito, u, cat, tipo }: TabProps) {
           <p className={`text-3xl font-bold tracking-tight ${completo ? (total >= 18 ? 'text-sem-green' : 'text-sem-amber') : 'text-ink-muted'}`}>{completo ? total : '—'}<span className="text-[14px] font-normal text-ink-muted"> / 30</span></p>
         </div>
         <fieldset disabled={!puede}>
-          <ActionForm action={(fd) => guardarEvaluacion(hito.id, fd)} autosave>
+          <ActionForm action={guardarEvaluacion.bind(null, hito.id)} autosave>
             <div className="grid gap-3 md:grid-cols-2">
               {CRITERIOS.map(([k, nombre, ayuda]) => (
                 <div key={k} className="rounded-field border border-line p-3">
@@ -60,7 +60,7 @@ export async function Evaluacion({ hito, u, cat, tipo }: TabProps) {
               const fila = matriz.find((m) => m.vertical_id === v.id)
               return (
                 <fieldset key={v.id} disabled={!puede} className="rounded-field border border-line p-3">
-                  <ActionForm action={(fd) => guardarVertical(hito.id, fd)} submit={puede ? (fila ? 'Actualizar' : 'Incluir en la matriz') : null} outline>
+                  <ActionForm action={guardarVertical.bind(null, hito.id)} submit={puede ? (fila ? 'Actualizar' : 'Incluir en la matriz') : null} outline>
                     <input type="hidden" name="vertical_id" value={v.id} />
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="font-semibold">{v.nombre}</h3>
@@ -79,7 +79,7 @@ export async function Evaluacion({ hito, u, cat, tipo }: TabProps) {
                     <div className="max-w-xs"><label className="label" htmlFor={`r-${v.id}`}>Rol (si lo confirmas, puedes ajustarlo)</label>
                       <select id={`r-${v.id}`} name="rol" defaultValue={fila?.rol ?? ''} className="field"><option value="">Usar el sugerido</option>{Object.entries(ROL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
                   </ActionForm>
-                  {fila && puede && <div className="mt-2"><ActionButton action={() => quitarVertical(hito.id, v.id)} confirmar={`¿Quitar ${v.nombre} de la matriz?`} className="text-[12px] text-ink-muted underline">Quitar de la matriz</ActionButton></div>}
+                  {fila && puede && <div className="mt-2"><ActionButton action={quitarVertical.bind(null, hito.id, v.id)} confirmar={`¿Quitar ${v.nombre} de la matriz?`} className="text-[12px] text-ink-muted underline">Quitar de la matriz</ActionButton></div>}
                 </fieldset>
               )
             })}

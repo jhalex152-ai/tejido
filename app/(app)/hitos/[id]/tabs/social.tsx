@@ -21,7 +21,7 @@ export async function Social({ hito, u }: TabProps) {
       <h2 className="mb-1 text-lg">Acción social</h2>
       <p className="mb-4 text-[13px] text-ink-muted">Fundación aliada, beneficiarios, equipos entregados y acta. El eje social se mide en alianzas RSE y beneficiarios, no en leads comerciales.</p>
       <fieldset disabled={!escribe}>
-        <ActionForm action={(fd) => guardarAccionSocial(hito.id, fd)} autosave>
+        <ActionForm action={guardarAccionSocial.bind(null, hito.id)} autosave>
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Fundación o aliado" htmlFor="as-al"><select id="as-al" name="aliado_id" defaultValue={a?.aliado_id ?? ''} className="field"><option value="">Sin definir</option>{(aliados ?? []).map((x) => <option key={x.id} value={x.id}>{x.nombre}</option>)}</select></Field>
             <Field label="Tipo de acción" htmlFor="as-t"><input id="as-t" name="tipo" defaultValue={a?.tipo ?? ''} placeholder="Entrega, visita, alianza…" className="field" /></Field>

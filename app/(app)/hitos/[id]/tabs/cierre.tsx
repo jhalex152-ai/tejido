@@ -62,7 +62,7 @@ export async function Cierre({ hito, u, cat, tipo }: TabProps) {
           <p className="text-[14px] text-ink-soft">Asistencia real reportada por el organizador: <b>{hito.asistentes_reales != null ? fmtNum(hito.asistentes_reales) : 'sin registrar'}</b>. Se edita en la pestaña Resumen.</p>
           {verCostos && (
             <div className="mt-4">
-              <ActionForm action={(fd) => guardarPresupuesto(hito.id, fd)} submit={puedeEscribir(u.rol, 'presupuesto') ? 'Guardar costo real' : null} outline>
+              <ActionForm action={guardarPresupuesto.bind(null, hito.id)} submit={puedeEscribir(u.rol, 'presupuesto') ? 'Guardar costo real' : null} outline>
                 <Field label={`Costo real del hito (${hito.moneda})`} htmlFor="cr-real"><input id="cr-real" inputMode="decimal" name="costo_real" defaultValue={pres?.costo_real ?? ''} disabled={!puedeEscribir(u.rol, 'presupuesto')} className="field" /></Field>
               </ActionForm>
             </div>
@@ -73,7 +73,7 @@ export async function Cierre({ hito, u, cat, tipo }: TabProps) {
           <h2 className="mb-1 text-lg">3 aprendizajes</h2>
           <p className="mb-4 text-[13px] text-ink-muted">Obligatorios para cerrar el hito. Alimentan la línea base de los próximos eventos.</p>
           <fieldset disabled={!escribe}>
-            <ActionForm action={(fd) => guardarCierre(hito.id, fd)} autosave>
+            <ActionForm action={guardarCierre.bind(null, hito.id)} autosave>
               {[1, 2, 3].map((n) => (
                 <Field key={n} label={`Aprendizaje ${n}`} htmlFor={`ap-${n}`}><textarea id={`ap-${n}`} name={`aprendizaje_${n}`} rows={2} defaultValue={aprend[n - 1] ?? ''} className="field" /></Field>
               ))}

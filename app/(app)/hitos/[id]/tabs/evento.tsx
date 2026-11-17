@@ -43,7 +43,7 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
         <section className="card">
           <h2 className="mb-4 text-lg">Stand</h2>
           <fieldset disabled={!escribe}>
-            <ActionForm action={(fd) => guardarStand(hito.id, fd)} autosave>
+            <ActionForm action={guardarStand.bind(null, hito.id)} autosave>
               <div className="grid gap-4 md:grid-cols-4">
                 <Field label="Ancho (m)" htmlFor="s-a"><input id="s-a" inputMode="decimal" name="ancho_m" defaultValue={st?.ancho_m ?? ''} className="field" /></Field>
                 <Field label="Fondo (m)" htmlFor="s-f"><input id="s-f" inputMode="decimal" name="fondo_m" defaultValue={st?.fondo_m ?? ''} className="field" /></Field>
@@ -67,7 +67,7 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
             {plano && <a href={plano} target="_blank" rel="noreferrer" className="chip-brand underline">Ver plano</a>}
             {renders.map((r, i) => r.url && (
               <span key={r.path} className="inline-flex items-center gap-2"><a href={r.url} target="_blank" rel="noreferrer" className="chip-brand underline">Render {i + 1}</a>
-                {escribe && <ActionButton action={() => quitarRender(hito.id, r.path)} confirmar="¿Quitar el render?" className="text-[12px] text-ink-muted underline">quitar</ActionButton>}</span>
+                {escribe && <ActionButton action={quitarRender.bind(null, hito.id, r.path)} confirmar="¿Quitar el render?" className="text-[12px] text-ink-muted underline">quitar</ActionButton>}</span>
             ))}
           </div>
         </section>
@@ -81,16 +81,16 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
             {items.map((i) => (
               <li key={i.id} className="flex items-center justify-between gap-2 py-1">
                 <fieldset disabled={!escribe} className="min-w-0 flex-1">
-                  <CheckAuto action={(fd) => actualizarChecklist(hito.id, i.id, fd)} defecto={i.completo}
+                  <CheckAuto action={actualizarChecklist.bind(null, hito.id, i.id)} defecto={i.completo}
                     label={<>{i.concepto}{i.critico && <span className="ml-2 chip-brand">crítico</span>}{i.vence_en && <span className="ml-2 text-[12px] text-ink-muted">{fechaCorta(i.vence_en)}</span>}</>} />
                 </fieldset>
-                {escribe && <ActionButton action={() => borrarChecklist(hito.id, i.id)} className="px-2 text-[12px] text-ink-muted underline">Quitar</ActionButton>}
+                {escribe && <ActionButton action={borrarChecklist.bind(null, hito.id, i.id)} className="px-2 text-[12px] text-ink-muted underline">Quitar</ActionButton>}
               </li>
             ))}
             {items.length === 0 && <li className="py-3 text-[14px] text-ink-muted">Aún no hay tareas. Agrega la primera.</li>}
           </ul>
           {escribe && (
-            <ActionForm action={(fd) => agregarChecklist(hito.id, fd)} submit="Agregar tarea" outline reset className="mt-4">
+            <ActionForm action={agregarChecklist.bind(null, hito.id)} submit="Agregar tarea" outline reset className="mt-4">
               <input name="concepto" required aria-label="Tarea" placeholder="Ej: Confirmar montaje de stand" className="field" />
               <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
                 <select name="responsable_id" aria-label="Responsable" className="field" defaultValue=""><option value="">Sin responsable</option>{personas.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)}</select>
@@ -110,10 +110,10 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
                 <li key={c.id} className="py-3">
                   <div className="flex items-start justify-between gap-2">
                     <div><p className="text-[14px] font-medium">{c.concepto}</p><p className="text-[12px] text-ink-muted">{c.proveedor ?? 'Sin proveedor'} · {fmtMoneda(Number(c.valor), c.moneda)}</p></div>
-                    {escribe && <ActionButton action={() => borrarCosto(hito.id, c.id)} confirmar="¿Eliminar este costo?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
+                    {escribe && <ActionButton action={borrarCosto.bind(null, hito.id, c.id)} confirmar="¿Eliminar este costo?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
                   </div>
                   <fieldset disabled={!escribe}>
-                    <ActionForm action={(fd) => actualizarCosto(hito.id, c.id, fd)} autosave delay={400}>
+                    <ActionForm action={actualizarCosto.bind(null, hito.id, c.id)} autosave delay={400}>
                       <select name="estado_pago" aria-label={`Estado de pago de ${c.concepto}`} defaultValue={c.estado_pago} className="field mt-2 md:w-48"><option value="pendiente">Pago pendiente</option><option value="parcial">Pago parcial</option><option value="pagado">Pagado</option></select>
                     </ActionForm>
                   </fieldset>
@@ -123,7 +123,7 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
             </ul>
             {Object.keys(totales).length > 0 && <p className="mt-2 text-[13px] text-ink-soft">Suma de ítems: {Object.entries(totales).map(([m, v]) => fmtMoneda(v, m)).join(' · ')}</p>}
             {escribe && (
-              <ActionForm action={(fd) => agregarCosto(hito.id, fd)} submit="Agregar costo" outline reset className="mt-4">
+              <ActionForm action={agregarCosto.bind(null, hito.id)} submit="Agregar costo" outline reset className="mt-4">
                 <div className="grid gap-2 md:grid-cols-2"><input name="concepto" required aria-label="Concepto" placeholder="Concepto" className="field" /><input name="proveedor" aria-label="Proveedor" placeholder="Proveedor" className="field" /></div>
                 <div className="grid grid-cols-[1fr_96px_1fr] gap-2">
                   <input name="valor" inputMode="decimal" aria-label="Valor" placeholder="Valor" className="field" />
@@ -141,7 +141,7 @@ export async function Evento({ hito, u, cat, tipo }: TabProps) {
           <h2 className="mb-1 text-lg">Presupuesto del hito</h2>
           <p className="mb-4 text-[13px] text-ink-muted">Solo lo ven administradores, líder de eventos, líder de impacto y Datos. Moneda del hito: {hito.moneda}.</p>
           <fieldset disabled={!puedeEscribir(u.rol, 'presupuesto')}>
-            <ActionForm action={(fd) => guardarPresupuesto(hito.id, fd)} autosave>
+            <ActionForm action={guardarPresupuesto.bind(null, hito.id)} autosave>
               <div className="grid gap-4 md:grid-cols-3">
                 <Field label="Costo estimado (Radar)" htmlFor="pr-e"><input id="pr-e" inputMode="decimal" name="costo_estimado" defaultValue={pres?.costo_estimado ?? ''} className="field" /></Field>
                 <Field label="Presupuesto total" htmlFor="pr-t"><input id="pr-t" inputMode="decimal" name="presupuesto_total" defaultValue={pres?.presupuesto_total ?? ''} className="field" /></Field>

@@ -22,8 +22,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-dvh bg-bg">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line bg-bg-deep p-4 md:flex">
         <Link href={u.rol === 'consulta' ? '/consulta' : '/inicio'} className="mb-8 flex items-center gap-3 px-2">
-          <Image src="/brand/isotipo.svg" alt="" width={32} height={32} unoptimized />
-          <span className="text-lg font-bold tracking-tight">Tejido</span>
+          <Image src="/brand/dropi-horizontal.svg" alt="Dropi" width={96} height={31} unoptimized priority />
+          <span className="rounded-full border border-line-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-light">Tejido</span>
         </Link>
         <Sidebar items={items} />
         <div className="mt-auto flex items-center gap-3 border-t border-line pt-4">
@@ -38,9 +38,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <div className="md:pl-64">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-line bg-bg/90 px-4 py-2 backdrop-blur md:justify-end md:px-8">
-          <Link href="/inicio" className="flex items-center gap-2 md:hidden">
-            <Image src="/brand/isotipo.svg" alt="" width={28} height={28} unoptimized />
-            <span className="font-bold">Tejido</span>
+          <Link href="/inicio" className="flex min-h-[44px] items-center gap-2 md:hidden">
+            <Image src="/brand/dropi-horizontal.svg" alt="Dropi" width={78} height={25} unoptimized />
+            <span className="rounded-full border border-line-strong px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-brand-light">Tejido</span>
           </Link>
           <div className="flex items-center gap-2">
             {u.rol !== 'consulta' && (

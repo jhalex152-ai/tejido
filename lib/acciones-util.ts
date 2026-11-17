@@ -1,6 +1,7 @@
 import 'server-only'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { parseNumero } from '@/lib/numeros'
 import type { Resultado } from '@/lib/types'
 
 export const str = (fd: FormData, k: string): string | null => {
@@ -11,9 +12,7 @@ export const str = (fd: FormData, k: string): string | null => {
 }
 export const num = (fd: FormData, k: string): number | null => {
   const s = str(fd, k)
-  if (s == null) return null
-  const n = Number(s.replace(/\./g, '').replace(',', '.'))
-  return Number.isFinite(n) ? n : null
+  return s == null ? null : parseNumero(s)
 }
 export const flag = (fd: FormData, k: string) => fd.get(k) === 'on' || fd.get(k) === 'true'
 

@@ -22,7 +22,11 @@ export const getCatalogos = cache(async () => {
     paises: (paises.data ?? []) as Pais[],
     etapas: (etapas.data ?? []) as Etapa[],
     verticales: (verticales.data ?? []) as Vertical[],
-    monedas: (monedas.data ?? []) as { codigo: string; cop_por_unidad: number; usd_por_unidad: number }[],
+    monedas: ((monedas.data ?? []) as { codigo: string; cop_por_unidad: number; usd_por_unidad: number }[]).sort((a, b) => {
+      const o = ['COP', 'USD', 'EUR', 'MXN']
+      const ia = o.indexOf(a.codigo), ib = o.indexOf(b.codigo)
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.codigo.localeCompare(b.codigo)
+    }),
     umbrales: umbrales as { verde: number; ambar: number },
   }
 })

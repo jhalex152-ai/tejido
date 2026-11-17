@@ -33,13 +33,13 @@ export async function Medios({ hito, u, cat }: TabProps) {
                 <p className="text-[12px] text-ink-muted">{fechaCorta(p.fecha)} · alcance {fmtNum(p.alcance)} · tono {p.tono ? TONO[p.tono as keyof typeof TONO] : '—'}{p.competidores?.length ? ` · menciona: ${p.competidores.join(', ')}` : ''}</p>
                 {p.url && <a href={p.url} target="_blank" rel="noreferrer" className="break-all text-[12px] text-brand-light underline">{p.url}</a>}
               </div>
-              {escribe && <ActionButton action={() => borrarPublicacion(hito.id, p.id)} confirmar="¿Eliminar la publicación?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
+              {escribe && <ActionButton action={borrarPublicacion.bind(null, hito.id, p.id)} confirmar="¿Eliminar la publicación?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
             </li>
           ))}
           {(pubs ?? []).length === 0 && <li className="py-3 text-[14px] text-ink-muted">Aún no hay publicaciones. Registra la primera en las 48 h posteriores al evento.</li>}
         </ul>
         {escribe && (
-          <ActionForm action={(fd) => agregarPublicacion(hito.id, fd)} submit="Registrar publicación" outline reset className="mt-5">
+          <ActionForm action={agregarPublicacion.bind(null, hito.id)} submit="Registrar publicación" outline reset className="mt-5">
             <div className="grid gap-3 md:grid-cols-2">
               <input name="medio" required aria-label="Medio" placeholder="Medio (LinkedIn, Semana, Portafolio…)" className="field" />
               <select name="tipo" aria-label="Tipo" className="field"><option value="ganado">Ganado</option><option value="propio">Propio</option><option value="pagado">Pagado</option></select>

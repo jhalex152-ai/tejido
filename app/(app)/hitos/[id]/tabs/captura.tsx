@@ -50,7 +50,7 @@ export async function Captura({ hito, u, cat }: TabProps) {
 
             <h3 className="eyebrow mb-2">Plan de captura</h3>
             <fieldset disabled={!escribe}>
-              <ActionForm action={(fd) => guardarPlan(hito.id, fd)} autosave>
+              <ActionForm action={guardarPlan.bind(null, hito.id)} autosave>
                 <input type="hidden" name="vertical_id" value={v.id} />
                 <div className="grid gap-4 md:grid-cols-2">
                   <Field label="Método de captura" htmlFor={`mt-${v.id}`}><input id={`mt-${v.id}`} name="metodo" defaultValue={plan?.metodo ?? ''} placeholder="QR a landing + tablet, escarapela, lista del organizador…" className="field" /></Field>
@@ -67,7 +67,7 @@ export async function Captura({ hito, u, cat }: TabProps) {
               </ActionForm>
             </fieldset>
             {plan && u.rol === 'admin' && (
-              <div className="mt-2"><ActionButton action={() => aprobarPlan(hito.id, plan.id, !plan.aprobado)} className={plan.aprobado ? 'btn-outline' : 'btn-primary'}>{plan.aprobado ? 'Quitar aprobación' : 'Aprobar plan de captura'}</ActionButton></div>
+              <div className="mt-2"><ActionButton action={aprobarPlan.bind(null, hito.id, plan.id, !plan.aprobado)} className={plan.aprobado ? 'btn-outline' : 'btn-primary'}>{plan.aprobado ? 'Quitar aprobación' : 'Aprobar plan de captura'}</ActionButton></div>
             )}
             {plan && !plan.aprobado && u.rol !== 'admin' && <p className="mt-2 text-[12px] text-ink-faint">Un administrador aprueba el plan. Sin aprobarlo, la compuerta de Preparación no pasa.</p>}
 
@@ -75,7 +75,7 @@ export async function Captura({ hito, u, cat }: TabProps) {
               <div className="mt-5 rounded-box border border-line p-4">
                 <h3 className="eyebrow mb-2">Link UTM, código y QR</h3>
                 <fieldset disabled={!escribe}>
-                  <ActionForm action={(fd) => generarCanal(hito.id, plan.id, fd)} submit={canal ? 'Regenerar' : 'Generar link y código'} outline>
+                  <ActionForm action={generarCanal.bind(null, hito.id, plan.id)} submit={canal ? 'Regenerar' : 'Generar link y código'} outline>
                     <Field label="Link de destino en el CRM (formulario o landing)" htmlFor={`ud-${v.id}`}><input id={`ud-${v.id}`} type="url" name="url_destino" defaultValue={canal?.url_destino ?? ''} placeholder="https://" className="field" /></Field>
                   </ActionForm>
                 </fieldset>
@@ -111,7 +111,7 @@ export async function Captura({ hito, u, cat }: TabProps) {
                   </dl>
                 )}
                 {cargaRes ? (
-                  <ActionForm action={(fd) => guardarResultados(hito.id, v.id, fd)} submit="Guardar resultados">
+                  <ActionForm action={guardarResultados.bind(null, hito.id, v.id)} submit="Guardar resultados">
                     <div className="grid grid-cols-2 gap-3 md:grid-cols-7">
                       {([['capturados', 'Capturados'], ['calif_a', 'Calif. A'], ['calif_b', 'Calif. B'], ['calif_c', 'Calif. C'], ['existentes', 'Existentes'], ['registros', 'Registros en Dropi'], ['activados_30d', 'Activos a 30 d']] as const).map(([k, l]) => (
                         <Field key={k} label={l} htmlFor={`${k}-${v.id}`}><input id={`${k}-${v.id}`} inputMode="numeric" name={k} defaultValue={r?.[k] ?? 0} className="field" /></Field>

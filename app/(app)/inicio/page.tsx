@@ -60,7 +60,7 @@ export default async function Inicio() {
               return (
                 <li key={h.id} className="space-y-2">
                   <HitoCard hito={h} ejes={cat.ejes} />
-                  {f && <p className="px-2 text-[13px] text-ink-muted">{f.length === 0 ? '✓ La compuerta está lista para aprobar' : `Falta${f.length > 1 ? 'n' : ''} ${f.length}: ${f[0]}${f.length > 1 ? ` y ${f.length - 1} más` : ''}`}</p>}
+                  {f && <p className="px-2 text-[13px] text-ink-muted">{f.length === 0 ? '✓ La compuerta está lista para aprobar' : `${f.length === 1 ? '1 pendiente' : `${f.length} pendientes`}: ${f[0]}${f.length > 1 ? ` y ${f.length - 1} más` : ''}`}</p>}
                 </li>
               )
             })}

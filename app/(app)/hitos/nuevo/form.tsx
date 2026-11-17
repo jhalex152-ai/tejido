@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { ActionForm } from '@/components/forms/action-form'
 import { Field } from '@/components/ui'
 import { TIPO_LABEL } from '@/lib/constants'
@@ -6,6 +7,7 @@ import { crearHito } from '../actions'
 import type { Eje, Pais } from '@/lib/types'
 
 export function NuevoHitoForm({ ejes, paises, monedas, soloSocial }: { ejes: Eje[]; paises: Pais[]; monedas: string[]; soloSocial: boolean }) {
+  const [moneda, setMoneda] = useState('COP')
   return (
     <ActionForm action={(fd) => crearHito(null, fd)} submit="Crear hito en Radar" className="card max-w-3xl !space-y-5">
       <p className="text-[14px] text-ink-muted">Ficha mínima del Radar. Podrás completarla después; la compuerta pide lo obligatorio según el tipo de hito.</p>
@@ -39,12 +41,12 @@ export function NuevoHitoForm({ ejes, paises, monedas, soloSocial }: { ejes: Eje
         <Field label="Asistentes estimados" htmlFor="asistentes_estimados"><input id="asistentes_estimados" inputMode="numeric" name="asistentes_estimados" className="field" /></Field>
         <div className="grid grid-cols-[1fr_96px] gap-2">
           <Field label="Costo estimado" htmlFor="costo_estimado"><input id="costo_estimado" inputMode="decimal" name="costo_estimado" className="field" /></Field>
-          <Field label="Moneda" htmlFor="moneda"><select id="moneda" name="moneda" className="field">{monedas.map((m) => <option key={m}>{m}</option>)}</select></Field>
+          <Field label="Moneda" htmlFor="moneda"><select id="moneda" name="moneda" className="field" value={moneda} onChange={(e) => setMoneda(e.target.value)}>{monedas.map((m) => <option key={m}>{m}</option>)}</select></Field>
         </div>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="País principal *" htmlFor="pais_principal">
-          <select id="pais_principal" name="pais_principal" className="field" defaultValue="CO">
+          <select id="pais_principal" name="pais_principal" className="field" defaultValue="CO" onChange={(e) => setMoneda(paises.find((p) => p.codigo === e.target.value)?.moneda ?? 'COP')}>
             {paises.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}
           </select>
         </Field>

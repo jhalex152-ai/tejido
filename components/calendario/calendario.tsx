@@ -46,7 +46,10 @@ export function CalendarioView({ items, paises, ejes, verticales, personas = [],
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [items, f])
 
-  const enDia = (d: string) => filtrados.filter((i) => i.ini <= d && i.fin >= d)
+  // Hitos de más de 14 días (membresías, agencia de PR…) van en una franja aparte: no tapan los eventos de cada día
+  const largo = (i: ItemCal) => (utc(i.fin).getTime() - utc(i.ini).getTime()) / 86400000 > 14
+  const enDia = (d: string) => filtrados.filter((i) => !largo(i) && i.ini <= d && i.fin >= d)
+  const permanentes = filtrados.filter((i) => largo(i))
   const Evento = ({ i, mini = false }: { i: ItemCal; mini?: boolean }) => {
     const cuerpo = (
       <span className={cn('block truncate rounded-md border-l-[3px] bg-surface-muted px-2 py-1 text-left', mini ? 'text-[11px]' : 'text-[13px]', i.estado !== 'activo' && 'opacity-60')} style={{ borderLeftColor: i.color }}>
@@ -110,6 +113,19 @@ export function CalendarioView({ items, paises, ejes, verticales, personas = [],
       <ul className="mb-4 flex flex-wrap gap-3 text-[12px] text-ink-muted" aria-label="Colores por eje">
         {ejes.map((e) => { const c = items.find((i) => i.ejeId === e.id)?.color; return c ? <li key={e.id} className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: c }} />{e.nombre}</li> : null })}
       </ul>
+
+      {vista !== 'lista' && permanentes.length > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 rounded-box border border-line bg-surface p-3">
+          <span className="text-[12px] uppercase tracking-wider text-ink-muted">Hitos de todo el período</span>
+          {permanentes.map((i) => (
+            <span key={i.id} className="inline-flex">
+              {enlazar
+                ? <Link href={`/hitos/${i.id}`} className="chip hover:border-brand" style={{ borderColor: i.color + '80' }}>{i.nombre} · {rangoFechas(i.ini, i.fin)}</Link>
+                : <span className="chip" style={{ borderColor: i.color + '80' }}>{i.nombre} · {rangoFechas(i.ini, i.fin)}</span>}
+            </span>
+          ))}
+        </div>
+      )}
 
       {vista === 'mes' && (
         <div className="overflow-hidden rounded-box border border-line">

@@ -17,8 +17,8 @@ const SECCIONES = [
   ['umbrales', 'Umbrales y metas'], ['plantillas', 'Plantillas'], ['auditoria', 'Auditoría'],
 ] as const
 
-const RolSelect = ({ name, def }: { name: string; def?: string }) => (
-  <select name={name} aria-label="Rol" defaultValue={def} className="field">{(Object.keys(ROL_LABEL) as Rol[]).map((r) => <option key={r} value={r}>{ROL_LABEL[r]}</option>)}</select>
+const RolSelect = ({ name, def, id }: { name: string; def?: string; id?: string }) => (
+  <select id={id} name={name} aria-label="Rol" defaultValue={def} className="field">{(Object.keys(ROL_LABEL) as Rol[]).map((r) => <option key={r} value={r}>{ROL_LABEL[r]}</option>)}</select>
 )
 
 export default async function Admin({ searchParams }: { searchParams: Promise<{ s?: string }> }) {
@@ -47,7 +47,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
             <section className="space-y-3">
               {(perfiles ?? []).map((p) => (
                 <div key={p.id} className="card !p-4">
-                  <ActionForm action={(fd) => actualizarUsuario(p.id, fd)} submit="Guardar" outline>
+                  <ActionForm action={actualizarUsuario.bind(null, p.id)} submit="Guardar" outline>
                     <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold">{p.nombre}{p.id === u.id && <span className="ml-2 chip-brand">tú</span>}</p><p className="text-[13px] text-ink-muted">{p.email}</p></div>
                       <label className="flex min-h-[44px] items-center gap-2 text-[14px]"><input type="checkbox" name="activo" defaultChecked={p.activo} className="h-5 w-5 accent-[#FF6F20]" />Activo</label></div>
                     <div className="grid gap-3 md:grid-cols-[240px_1fr]"><RolSelect name="rol" def={p.rol} /><input name="motivo" required aria-label="Motivo del cambio" placeholder="Motivo del cambio (queda en el log)" className="field" /></div>
@@ -61,12 +61,12 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                 <ActionForm action={invitar} submit="Invitar" reset>
                   <Field label="Correo" htmlFor="inv-e"><input id="inv-e" type="email" name="email" required className="field" /></Field>
                   <Field label="Nombre" htmlFor="inv-n"><input id="inv-n" name="nombre" className="field" /></Field>
-                  <Field label="Rol" htmlFor="inv-r"><RolSelect name="rol" def="consulta" /></Field>
+                  <Field label="Rol" htmlFor="inv-r"><RolSelect id="inv-r" name="rol" def="consulta" /></Field>
                 </ActionForm></section>
               <section className="card"><h2 className="mb-3 text-lg">Invitaciones pendientes</h2>
                 <ul className="space-y-2 text-[14px]">{(invs ?? []).map((i) => (
                   <li key={i.email} className="flex items-center justify-between gap-2"><span>{i.email}<span className="block text-[12px] text-ink-muted">{ROL_LABEL[i.rol as Rol]}</span></span>
-                    <ActionButton action={() => quitarInvitacion(i.email)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton></li>))}
+                    <ActionButton action={quitarInvitacion.bind(null, i.email)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton></li>))}
                   {(invs ?? []).length === 0 && <li className="text-ink-muted">Ninguna.</li>}</ul></section>
             </aside>
           </div>
@@ -78,7 +78,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <p className="max-w-3xl text-[14px] text-ink-muted">La prioridad es la propuesta del brief del área. Edítala aquí junto con moneda, zona horaria y contacto local de eventos.</p>
           {cat.paises.map((p) => (
             <div key={p.codigo} className="card !p-4">
-              <ActionForm action={(fd) => actualizarPais(p.codigo, fd)} submit="Guardar" outline>
+              <ActionForm action={actualizarPais.bind(null, p.codigo)} submit="Guardar" outline>
                 <p className="font-semibold">{p.nombre} <span className="text-[13px] font-normal text-ink-muted">{p.codigo} · {p.marca} · {p.region}</span></p>
                 <div className="grid gap-3 md:grid-cols-5">
                   <select name="prioridad" aria-label="Prioridad" defaultValue={p.prioridad} className="field">{Object.entries(PRIORIDAD_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select>
@@ -117,7 +117,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
             <section className="space-y-2">{(data ?? []).map((v) => (
               <div key={v.id} className="card !p-4 flex items-center justify-between gap-3"><div><p className="font-semibold">{v.nombre}</p><p className="text-[13px] text-ink-muted">{v.cargo} {v.temas?.length ? `· ${v.temas.join(', ')}` : ''}</p></div>
-                <ActionButton action={() => borrarVocero(v.id)} confirmar="¿Eliminar el vocero?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton></div>))}
+                <ActionButton action={borrarVocero.bind(null, v.id)} confirmar="¿Eliminar el vocero?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton></div>))}
               {(data ?? []).length === 0 && <p className="text-ink-muted">Aún no hay voceros: agrega al primero para poder asignarlo a una narrativa.</p>}</section>
             <aside className="card h-fit"><h2 className="mb-3 text-lg">Nuevo vocero</h2>
               <ActionForm action={guardarVocero} submit="Agregar" reset>
@@ -133,7 +133,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
         <section className="space-y-3">
           <p className="max-w-3xl text-[14px] text-ink-muted">Tasas para convertir los costos a COP y USD en el tablero. Los valores iniciales son <b>referenciales</b>: actualízalos.</p>
           {cat.monedas.map((m) => (
-            <div key={m.codigo} className="card !p-4"><ActionForm action={(fd) => guardarMoneda(m.codigo, fd)} submit="Guardar" outline>
+            <div key={m.codigo} className="card !p-4"><ActionForm action={guardarMoneda.bind(null, m.codigo)} submit="Guardar" outline>
               <div className="grid items-end gap-3 md:grid-cols-[80px_1fr_1fr]"><p className="pb-3 text-lg font-bold">{m.codigo}</p>
                 <Field label="COP por 1 unidad" htmlFor={`m-c-${m.codigo}`}><input id={`m-c-${m.codigo}`} name="cop_por_unidad" defaultValue={String(m.cop_por_unidad).replace('.', ',')} className="field" /></Field>
                 <Field label="USD por 1 unidad" htmlFor={`m-u-${m.codigo}`}><input id={`m-u-${m.codigo}`} name="usd_por_unidad" defaultValue={String(m.usd_por_unidad).replace('.', ',')} className="field" /></Field></div>
@@ -151,7 +151,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
                   <Field label="Ámbar (≥ %)" htmlFor="u-a"><input id="u-a" name="ambar" defaultValue={cat.umbrales.ambar} inputMode="numeric" className="field" /></Field></div>
               </ActionForm></section>
             <section className="card"><h2 className="mb-1 text-lg">Metas trimestrales</h2><p className="mb-3 text-[13px] text-ink-muted">Por movilizador, eje, vertical o país (pendiente de definir para 2027).</p>
-              <ul className="mb-4 space-y-1.5 text-[14px]">{(metas ?? []).map((m) => <li key={m.id} className="flex items-center justify-between rounded-field border border-line px-3 py-2"><span>{m.trimestre} · {m.nivel} · {m.clave}: <b>{m.meta}</b></span><ActionButton action={() => borrarMeta(m.id)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton></li>)}</ul>
+              <ul className="mb-4 space-y-1.5 text-[14px]">{(metas ?? []).map((m) => <li key={m.id} className="flex items-center justify-between rounded-field border border-line px-3 py-2"><span>{m.trimestre} · {m.nivel} · {m.clave}: <b>{m.meta}</b></span><ActionButton action={borrarMeta.bind(null, m.id)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton></li>)}</ul>
               <ActionForm action={guardarMeta} submit="Guardar meta" outline reset>
                 <div className="grid grid-cols-2 gap-2"><input name="trimestre" aria-label="Trimestre" placeholder="2027-Q1" className="field" />
                   <select name="nivel" aria-label="Nivel" className="field"><option value="movilizador">Movilizador</option><option value="eje">Eje</option><option value="vertical">Vertical</option><option value="pais">País</option></select>
@@ -170,7 +170,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               {(data ?? []).map((p) => (
                 <div key={p.id} className="card !p-3 flex items-center justify-between gap-3"><div><p className="text-[14px] font-medium">{p.nombre}{p.obligatorio && <span className="ml-1 text-brand-light">*</span>}</p>
                   <p className="text-[12px] text-ink-muted">{NOMBRE_ETAPA[p.etapa_id]} · {p.tipo_hito ? TIPO_LABEL[p.tipo_hito as keyof typeof TIPO_LABEL] : 'Todos los tipos'}</p></div>
-                  <ActionButton action={() => borrarPlantilla(p.id)} confirmar="¿Quitar de la plantilla?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton></div>))}
+                  <ActionButton action={borrarPlantilla.bind(null, p.id)} confirmar="¿Quitar de la plantilla?" className="text-[12px] text-ink-muted underline">Quitar</ActionButton></div>))}
             </section>
             <aside className="card h-fit"><h2 className="mb-3 text-lg">Nuevo entregable</h2>
               <ActionForm action={agregarPlantilla} submit="Agregar" reset>
@@ -184,8 +184,11 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       })()}
 
       {s === 'auditoria' && await (async () => {
-        const { data } = await sb.from('actividad').select('id,accion,entidad,motivo,creado_en,hito_id,profiles:user_id(nombre)').order('creado_en', { ascending: false }).limit(80)
-        const filas = (data ?? []) as unknown as { id: number; accion: string; entidad: string; motivo: string | null; creado_en: string; hito_id: string | null; profiles: { nombre: string } | null }[]
+        const { data } = await sb.from('actividad').select('id,user_id,accion,entidad,motivo,creado_en,hito_id').order('creado_en', { ascending: false }).limit(80)
+        const ids = [...new Set((data ?? []).map((f) => f.user_id).filter(Boolean))]
+        const { data: perfiles } = ids.length ? await sb.from('profiles').select('id,nombre').in('id', ids) : { data: [] }
+        const nombre = new Map((perfiles ?? []).map((p) => [p.id, p.nombre]))
+        const filas = (data ?? []).map((f) => ({ ...f, profiles: f.user_id ? { nombre: nombre.get(f.user_id) ?? 'Usuario' } : null })) as { id: number; accion: string; entidad: string; motivo: string | null; creado_en: string; hito_id: string | null; profiles: { nombre: string } | null }[]
         return (
           <section className="card"><h2 className="mb-1 text-lg">Log de auditoría</h2><p className="mb-3 text-[13px] text-ink-muted">Cambios de etapa, aprobaciones, forzados, borrados y cambios de rol. Solo inserción: nadie puede editarlo.</p>
             <ul className="divide-y divide-line">{filas.map((f) => (

@@ -49,14 +49,14 @@ export default async function BibliotecaDatos({ searchParams }: { searchParams: 
                     <p className="mt-1 text-2xl font-bold tracking-tight text-brand-light">{c.valor != null ? new Intl.NumberFormat('es-CO').format(c.valor) : c.valor_texto} <span className="text-[14px] font-normal text-ink-muted">{c.unidad}</span></p>
                     <p className="text-[12px] text-ink-muted">Fuente: {c.fuente} · corte {fechaCorta(c.fecha_corte)}{c.vigente_hasta && ` · vigente hasta ${fechaCorta(c.vigente_hasta)}`}</p>
                     {puede && (
-                      <ActionForm action={(fd) => estadoCifra(c.id, fd)} autosave delay={600} className="mt-3">
+                      <ActionForm action={estadoCifra.bind(null, c.id)} autosave delay={600} className="mt-3">
                         <div className="grid grid-cols-2 gap-2 md:w-96">
                           <select name="estado" aria-label="Estado" defaultValue={c.estado === 'vencida' ? 'borrador' : c.estado} className="field"><option value="borrador">Borrador</option><option value="validada">Validada para vocería</option></select>
                           <input type="date" name="vigente_hasta" aria-label="Vigente hasta" defaultValue={c.vigente_hasta ?? ''} className="field" />
                         </div>
                       </ActionForm>
                     )}
-                    {puede && <div className="mt-1"><ActionButton action={() => borrarCifra(c.id)} confirmar="¿Eliminar la cifra? Se desvincula de los hitos." className="text-[12px] text-ink-muted underline">Eliminar</ActionButton></div>}
+                    {puede && <div className="mt-1"><ActionButton action={borrarCifra.bind(null, c.id)} confirmar="¿Eliminar la cifra? Se desvincula de los hitos." className="text-[12px] text-ink-muted underline">Eliminar</ActionButton></div>}
                   </li>
                 )
               })}

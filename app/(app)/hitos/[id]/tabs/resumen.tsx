@@ -31,7 +31,7 @@ export async function Resumen({ hito, u, cat, tipo }: TabProps) {
         <section className="card">
           <h2 className="mb-4 text-lg">Ficha del hito</h2>
           <fieldset disabled={!puedeFicha} className="disabled:opacity-80">
-            <ActionForm action={(fd) => guardarFicha(hito.id, fd)} submit={puedeFicha ? 'Guardar ficha' : null} autosave={false}>
+            <ActionForm action={guardarFicha.bind(null, hito.id)} submit={puedeFicha ? 'Guardar ficha' : null} autosave={false}>
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Nombre" htmlFor="r-nombre"><input id="r-nombre" name="nombre" defaultValue={hito.nombre} className="field" required /></Field>
                 <Field label="Tipo" htmlFor="r-tipo">
@@ -70,7 +70,7 @@ export async function Resumen({ hito, u, cat, tipo }: TabProps) {
           <h2 className="mb-1 text-lg">Países</h2>
           <p className="mb-4 text-[13px] text-ink-muted">Todo hito tiene país. Un hito digital (webinar, live) puede marcar varios.</p>
           <fieldset disabled={!puedeFicha}>
-            <ActionForm action={(fd) => guardarPaises(hito.id, fd)} submit={puedeFicha ? 'Guardar países' : null}>
+            <ActionForm action={guardarPaises.bind(null, hito.id)} submit={puedeFicha ? 'Guardar países' : null}>
               <Field label="País principal" htmlFor="r-pp">
                 <select id="r-pp" name="principal" defaultValue={principal} className="field md:w-72">{cat.paises.map((p) => <option key={p.codigo} value={p.codigo}>{p.nombre}</option>)}</select>
               </Field>
@@ -98,7 +98,7 @@ export async function Resumen({ hito, u, cat, tipo }: TabProps) {
             <ul className="space-y-3">
               {entregables.map((e) => (
                 <li key={e.id} className="rounded-field border border-line p-3">
-                  <ActionForm action={(fd) => guardarEntregable(hito.id, e.id, fd)} autosave delay={900}>
+                  <ActionForm action={guardarEntregable.bind(null, hito.id, e.id)} autosave delay={900}>
                     <label className="flex min-h-[44px] items-center gap-3">
                       <input type="checkbox" name="completo" defaultChecked={e.completo} className="h-5 w-5 accent-[#FF6F20]" />
                       <span className="text-[14px] font-medium">{e.plantillas_entregables.nombre}{e.plantillas_entregables.obligatorio && <span className="ml-1 text-brand-light">*</span>}</span>
@@ -117,13 +117,13 @@ export async function Resumen({ hito, u, cat, tipo }: TabProps) {
             {((asig ?? []) as unknown as { user_id: string; funcion: string; profiles: { nombre: string } }[]).map((a) => (
               <li key={a.user_id} className="flex items-center justify-between gap-2 text-[14px]">
                 <span>{a.profiles?.nombre} <span className="text-ink-muted">· {a.funcion}</span></span>
-                {puedeAsignar && <ActionButton action={() => quitarAsignacion(hito.id, a.user_id)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
+                {puedeAsignar && <ActionButton action={quitarAsignacion.bind(null, hito.id, a.user_id)} className="text-[12px] text-ink-muted underline">Quitar</ActionButton>}
               </li>
             ))}
             {(asig ?? []).length === 0 && <li className="text-[14px] text-ink-muted">Nadie asignado todavía.</li>}
           </ul>
           {puedeAsignar && (
-            <ActionForm action={(fd) => asignar(hito.id, fd)} submit="Asignar" outline reset>
+            <ActionForm action={asignar.bind(null, hito.id)} submit="Asignar" outline reset>
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 <select name="user_id" aria-label="Persona" className="field" defaultValue="">{[<option key="" value="" disabled>Elige una persona</option>, ...personas.map((p) => <option key={p.id} value={p.id}>{p.nombre}</option>)]}</select>
                 <select name="funcion" aria-label="Función" className="field w-36"><option value="ejecucion">Ejecución</option><option value="logistica">Logística</option><option value="medios">Medios</option><option value="datos">Datos</option></select>

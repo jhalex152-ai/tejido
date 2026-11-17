@@ -10,8 +10,11 @@ const ACC: Record<string, string> = {
 
 export async function Actividad({ hito }: TabProps) {
   const sb = await createClient()
-  const { data } = await sb.from('actividad').select('id,user_id,accion,motivo,creado_en,profiles:user_id(nombre)').eq('hito_id', hito.id).order('creado_en', { ascending: false }).limit(100)
-  const filas = (data ?? []) as unknown as { id: number; accion: string; motivo: string | null; creado_en: string; profiles: { nombre: string } | null }[]
+  const { data } = await sb.from('actividad').select('id,user_id,accion,motivo,creado_en').eq('hito_id', hito.id).order('creado_en', { ascending: false }).limit(100)
+  const ids = [...new Set((data ?? []).map((f) => f.user_id).filter(Boolean))]
+  const { data: perfiles } = ids.length ? await sb.from('profiles').select('id,nombre').in('id', ids) : { data: [] }
+  const nombre = new Map((perfiles ?? []).map((p) => [p.id, p.nombre]))
+  const filas = (data ?? []).map((f) => ({ ...f, profiles: f.user_id ? { nombre: nombre.get(f.user_id) ?? 'Usuario' } : null })) as { id: number; accion: string; motivo: string | null; creado_en: string; profiles: { nombre: string } | null }[]
   return (
     <section className="card">
       <h2 className="mb-1 text-lg">Registro de actividad</h2>

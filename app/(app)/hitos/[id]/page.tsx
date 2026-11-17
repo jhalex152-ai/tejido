@@ -68,7 +68,7 @@ export default async function DetalleHito({ params, searchParams }: { params: Pr
 
   return (
     <div className="mx-auto max-w-6xl">
-      <Link href="/hitos" className="text-[13px] text-ink-muted hover:text-ink">← Hitos</Link>
+      <Link href="/hitos" className="inline-flex min-h-[44px] items-center text-[13px] text-ink-muted hover:text-ink">← Hitos</Link>
 
       <header className="card-raised mt-2">
         <div className="flex flex-wrap items-start justify-between gap-3">

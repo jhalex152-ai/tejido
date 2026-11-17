@@ -69,6 +69,17 @@ Prueba, entre otras cosas: correo no invitado rechazado, Consulta sin costos, do
 ("Falta 1 cifra validada para el eje E-commerce"), plan de captura obligatorio, forzar solo Admin con motivo, semáforo ámbar/rojo,
 alerta de país sin hitos y log inmutable.
 
+### Pruebas de punta a punta (E2E)
+
+`tests/e2e/` maneja un navegador real (Playwright) contra la app y un Supabase real o de staging. Necesitan usuarios de prueba con contraseña, uno por rol
+(`e2e-admin|eventos|doer|impacto|marcom|datos|consulta@…`), y `TEST_PW` con esa contraseña. **No las corras contra producción con datos reales:** crean y borran un hito.
+
+```bash
+TEST_PW=… BASE_URL=http://localhost:3100 node tests/e2e/smoke.mjs         # recorre las pantallas por rol
+TEST_PW=… node tests/e2e/ciclo.mjs                                        # un hito de Radar a Cierre, cada rol en su pantalla (34 pasos)
+TEST_PW=… node tests/e2e/movil-kanban.mjs                                 # 360 px sin desbordes y arrastre del kanban
+```
+
 ## Decisiones y desviaciones del PRD (revísalas)
 
 - **Gate de Amplificación**: exige *al menos una* publicación; que sea ≤ 48 h se mide como KPI y, si vence la ventana, el hito pasa a ámbar. Así una publicación tardía no deja el hito bloqueado para siempre.
@@ -76,5 +87,6 @@ alerta de país sin hitos y log inmutable.
 - **Tasas de cambio** (`monedas`) son referenciales: actualízalas en Admin → Monedas.
 - **Formularios**: Server Actions con validación Zod en los flujos críticos y `FormData` nativo en el resto (no React Hook Form) para mantener los formularios autoguardables simples.
 - **Calendario propio** (mes/semana/lista) en lugar de FullCalendar: menos peso y lista por defecto en móvil.
-- El **logo de Dropi** del PRD no estaba disponible: `public/brand/isotipo.svg` es un marcador. Reemplázalo por el SVG de la presentación.
+- **Logo:** `public/brand/dropi-horizontal.svg` y `isotipo.png` se descargaron del sitio dropi.co. Si tienen el SVG de la presentación del área, reemplázalo ahí.
+- **Acceso con contraseña** (además de Google y enlace mágico): sirve para pruebas y para quien no use Google. No abre el registro: la cuenta debe estar invitada por un administrador. Si no lo quieren, borra el formulario de `app/(auth)/login/login-form.tsx`.
 - Una cuenta con rol `datos`/`marcom` ve el tablero; el costo por lead solo se calcula si el rol puede leer `presupuestos`.
