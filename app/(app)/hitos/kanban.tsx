@@ -87,7 +87,7 @@ export function Kanban({ hitos, etapas, ejes, paises, puedeMover }: { hitos: Hit
 
       {/* Escritorio: una columna por etapa */}
       <DndContext sensors={sensors} onDragEnd={soltar}>
-        <div className="-mx-4 hidden gap-4 overflow-x-auto px-4 pb-4 md:flex md:-mx-8 md:px-8">
+        <div className="-mx-4 hidden gap-4 overflow-x-auto px-4 pb-4 [contain:paint] md:flex md:-mx-8 md:px-8">
           {etapas.map((et) => {
             const items = filtrados.filter((h) => h.etapa_id === et.id)
             return (
