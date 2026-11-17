@@ -1,0 +1,12 @@
+name: Respaldo semanal
+on:
+  schedule: [{ cron: '0 8 * * 1' }]
+  workflow_dispatch:
+jobs:
+  pg-dump:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pg_dump "$SUPABASE_DB_URL" --no-owner --format=custom -f tejido-$(date +%F).dump
+        env: { SUPABASE_DB_URL: '${{ secrets.SUPABASE_DB_URL }}' }
+      - uses: actions/upload-artifact@v4
+        with: { name: respaldo-tejido, path: '*.dump', retention-days: 60 }
